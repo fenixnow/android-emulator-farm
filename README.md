@@ -136,6 +136,8 @@ python3 scripts/emulator_manager.py stop
 
 ## Запуск как systemd-сервис
 
+### Эмуляторы + watchdog
+
 ```bash
 sudo cp -r . /opt/android-emulator-farm
 sudo cp systemd/android-emulator-watchdog.service /etc/systemd/system/
@@ -147,6 +149,104 @@ journalctl -u android-emulator-watchdog.service -f
 
 Отредактируйте пути `ANDROID_HOME`/`WorkingDirectory` в `.service`-файле под свою
 установку SDK перед копированием в `/etc/systemd/system`.
+
+**Правка и перезапуск сервиса:**
+
+```bash
+sudo nano /etc/systemd/system/android-emulator-watchdog.service
+sudo systemctl daemon-reload
+sudo systemctl restart android-emulator-watchdog.service
+sudo systemctl status android-emulator-watchdog.service
+journalctl -u android-emulator-watchdog.service -f
+```
+
+### Appium server + Device Farm
+
+```bash
+# 1. Установить Node.js и Appium
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+source ~/.bashrc
+nvm install 22
+npm install -g appium
+
+# 2. Установить драйвер uiautomator2
+appium driver install uiautomator2
+
+# 3. Установить плагин Device Farm (дашборд + управление устройствами)
+appium plugin install --source=npm appium-device-farm
+
+# 4. Создать пользователя и директорию
+sudo useradd -r -s /bin/false appium
+sudo mkdir -p /opt/appium /var/log/appium
+sudo chown -R appium:appium /opt/appium /var/log/appium
+
+# 5. Установить systemd-юнит
+sudo cp systemd/appium-server.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now appium-server.service
+sudo systemctl status appium-server.service
+journalctl -u appium-server.service -f
+```
+
+Дашборд Device Farm: `http://<host>:4723/device-farm`
+
+**Файл `systemd/appium-server.service`:**
+
+```ini
+[Unit]
+Description=Appium Server for Android Test Automation Farm
+After=android-emulator-watchdog.service
+Wants=android-emulator-watchdog.service
+
+[Service]
+Type=simple
+User=appium
+Group=appium
+WorkingDirectory=/opt/appium
+
+Environment=ANDROID_HOME=/opt/android-sdk
+Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/tools
+
+ExecStart=/usr/bin/appium server \
+  --address 0.0.0.0 \
+  --port 4723 \
+  --base-path /wd/hub \
+  --allow-cors \
+  --session-override \
+  --use-plugins=device-farm \
+  --plugin-device-farm-platform=android \
+  --log-level info \
+  --log /var/log/appium/appium-farm.log
+
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Правка и перезапуск сервиса:**
+
+```bash
+# отредактировать unit-файл
+sudo nano /etc/systemd/system/appium-server.service
+
+# применить изменения и перезапустить
+sudo systemctl daemon-reload
+sudo systemctl restart appium-server.service
+
+# проверить статус и логи
+sudo systemctl status appium-server.service
+journalctl -u appium-server.service -f
+```
+
+**Важно:** При подключении нескольких эмуляторов к одному Appium задавайте уникальный
+`systemPort` в capabilities для каждого устройства (8200, 8201, …) во избежание конфликтов.
 
 ## Возможные доработки
 

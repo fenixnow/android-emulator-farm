@@ -67,6 +67,7 @@ class EmulatorSpec:
     wipe_data: bool = False
     no_snapshot_save: bool = True
     locale: str = ""
+    prop: dict = field(default_factory=dict)  # -prop key=value для эмулятора (ro.product.model и т.д.)
     pid: Optional[int] = None
     restart_count: int = field(default=0)
 
@@ -377,6 +378,8 @@ class EmulatorManager:
             flags.append("-wipe-data")
         if spec.no_snapshot_save:
             flags.append("-no-snapshot-save")
+        for key, value in spec.prop.items():
+            flags.append(f"-prop {key}={value}")
         if spec.extra_args:
             flags.append(spec.extra_args)
 

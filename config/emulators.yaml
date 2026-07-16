@@ -68,6 +68,8 @@ emulators:
     wipe_data: false
     no_snapshot_save: true
     locale: "ru-RU"
+    prop:
+      ro.product.model: "Medium Phone 1"
 
   - name: emu2
     avd: medium_phone_2
@@ -77,6 +79,8 @@ emulators:
     wipe_data: false
     no_snapshot_save: true
     locale: "ru-RU"
+    prop:
+      ro.product.model: "Medium Phone 2"
 
   - name: emu3
     avd: medium_phone_3
@@ -86,6 +90,8 @@ emulators:
     wipe_data: false
     no_snapshot_save: true
     locale: "ru-RU"
+    prop:
+      ro.product.model: "Medium Phone 3"
 
   - name: emu4
     avd: low_end_phone_1
@@ -95,6 +101,8 @@ emulators:
     wipe_data: false
     no_snapshot_save: true
     locale: "ru-RU"
+    prop:
+      ro.product.model: "Low-End Phone 1"
 
   - name: emu5
     avd: low_end_phone_2
@@ -104,6 +112,8 @@ emulators:
     wipe_data: false
     no_snapshot_save: true
     locale: "ru-RU"
+    prop:
+      ro.product.model: "Low-End Phone 2"
 
   - name: emu6
     avd: low_end_phone_3
@@ -113,6 +123,8 @@ emulators:
     wipe_data: false
     no_snapshot_save: true
     locale: "ru-RU"
+    prop:
+      ro.product.model: "Low-End Phone 3"
 
 # =============================================================================
 # Watchdog

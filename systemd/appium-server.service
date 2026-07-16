@@ -1,0 +1,36 @@
+[Unit]
+Description=Appium Server for Android Test Automation Farm
+After=android-emulator-watchdog.service
+Wants=android-emulator-watchdog.service
+
+[Service]
+Type=simple
+User=appium
+Group=appium
+WorkingDirectory=/opt/appium
+
+Environment=ANDROID_HOME=/opt/android-sdk
+Environment=ANDROID_SDK_ROOT=/opt/android-sdk
+Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/android-sdk/emulator:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin
+
+ExecStart=/usr/bin/appium server \
+  --address 0.0.0.0 \
+  --port 4723 \
+  --base-path /wd/hub \
+  --allow-cors \
+  --session-override \
+  --use-plugins=device-farm \
+  --plugin-device-farm-platform=android \
+  --log-level info \
+  --log /var/log/appium/appium-farm.log
+
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
