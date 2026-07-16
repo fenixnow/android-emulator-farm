@@ -82,3 +82,4 @@ apks/*.apk
 logs/*.log
 logs/*.json
 
+.idea
