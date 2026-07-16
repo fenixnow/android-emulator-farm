@@ -1,0 +1,22 @@
+[Unit]
+Description=Android Emulator Farm Watchdog
+After=network.target
+
+[Service]
+Type=simple
+User=android-farm
+Group=android-farm
+WorkingDirectory=/opt/android-emulator-farm
+Environment="ANDROID_HOME=/opt/android-sdk"
+Environment="ANDROID_SDK_ROOT=/opt/android-sdk"
+Environment="PATH=/opt/android-sdk/emulator:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/python3 /opt/android-emulator-farm/scripts/emulator_manager.py watch
+ExecStartPre=/usr/bin/python3 /opt/android-emulator-farm/scripts/emulator_manager.py start
+ExecStop=/usr/bin/python3 /opt/android-emulator-farm/scripts/emulator_manager.py stop
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

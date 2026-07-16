@@ -1,0 +1,21 @@
+emulators:
+  - name: emu1
+    avd: Pixel_5_API_33
+    port: 5554
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+  - name: emu2
+    avd: Pixel_5_API_33_clone1
+    port: 5556
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+  - name: emu3
+    avd: Pixel_5_API_33_clone2
+    port: 5558
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+
+watchdog:
+  poll_interval_sec: 30       # как часто проверять доступность
+  boot_timeout_sec: 180       # сколько ждать загрузки после старта/рестарта
+  adb_timeout_sec: 5          # таймаут на одну adb-команду
+  max_restart_attempts: 3     # сколько раз подряд пытаться перезапустить, прежде чем алертить
+  log_file: logs/watchdog.log
+  state_file: logs/state.json
