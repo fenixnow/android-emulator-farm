@@ -1,0 +1,17 @@
+{
+  "server": {
+    "address": "0.0.0.0",
+    "port": 4723,
+    "base-path": "/wd/hub",
+    "allow-cors": true,
+    "session-override": true,
+    "log-level": "info",
+    "log": "/var/log/appium/appium-farm.log",
+    "use-plugins": ["device-farm"],
+    "plugin": {
+      "device-farm": {
+        "platform": "android"
+      }
+    }
+  }
+}

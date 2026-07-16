@@ -163,16 +163,16 @@ journalctl -u android-emulator-watchdog.service -f
 ### Appium server + Device Farm
 
 ```bash
-# 1. Установить Node.js и Appium
+# 1. Установить Node.js
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 source ~/.bashrc
 nvm install 22
-npm install -g appium
 
-# 2. Установить драйвер uiautomator2
+# 2. Установить Appium глобально (от root с текущим PATH — попадёт в /usr/local/bin/)
+sudo env "PATH=$PATH" npm install -g appium
+
+# 3. Установить драйвер uiautomator2 и плагин Device Farm
 appium driver install uiautomator2
-
-# 3. Установить плагин Device Farm (дашборд + управление устройствами)
 appium plugin install --source=npm appium-device-farm
 
 # 4. Создать пользователя и директорию
@@ -190,6 +190,42 @@ journalctl -u appium-server.service -f
 
 Дашборд Device Farm: `http://<host>:4723/device-farm`
 
+**Управление плагинами и драйверами:**
+
+```bash
+appium driver list                    # список драйверов
+appium driver install uiautomator2    # установить
+appium driver uninstall uiautomator2  # удалить
+appium driver update uiautomator2     # обновить
+
+appium plugin list                              # список плагинов
+appium plugin install --source=npm appium-device-farm
+appium plugin uninstall device-farm
+appium plugin update device-farm
+```
+
+**Конфиг `config/appium-config.json`:**
+
+```json
+{
+  "server": {
+    "address": "0.0.0.0",
+    "port": 4723,
+    "base-path": "/wd/hub",
+    "allow-cors": true,
+    "session-override": true,
+    "log-level": "info",
+    "log": "/var/log/appium/appium-farm.log",
+    "use-plugins": ["device-farm"],
+    "plugin": {
+      "device-farm": {
+        "platform": "android"
+      }
+    }
+  }
+}
+```
+
 **Файл `systemd/appium-server.service`:**
 
 ```ini
@@ -205,19 +241,11 @@ Group=appium
 WorkingDirectory=/opt/appium
 
 Environment=ANDROID_HOME=/opt/android-sdk
+Environment=ANDROID_SDK_ROOT=/opt/android-sdk
 Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/tools
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/android-sdk/emulator:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin
 
-ExecStart=/usr/bin/appium server \
-  --address 0.0.0.0 \
-  --port 4723 \
-  --base-path /wd/hub \
-  --allow-cors \
-  --session-override \
-  --use-plugins=device-farm \
-  --plugin-device-farm-platform=android \
-  --log-level info \
-  --log /var/log/appium/appium-farm.log
+ExecStart=/usr/local/bin/appium server --config /opt/android-emulator-farm/config/appium-config.json
 
 Restart=on-failure
 RestartSec=5
