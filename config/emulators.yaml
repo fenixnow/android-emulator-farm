@@ -3,12 +3,12 @@
 # =============================================================================
 
 avds:
-  # --- medium_phone: FHD+ (1080×2400, 420dpi) — основной тип (~80% пользователей) ---
-  - name: medium_phone
+  # --- medium_phone ×3: FHD+ (1080×2400, 420dpi) — основной тип (~80% пользователей) ---
+  - name: medium_phone_1
     device: pixel_6
     system_image: "system-images;android-34;google_apis;x86_64"
     sdcard: "512M"
-    hw:
+    hw: &hw_medium
       hw.lcd.width: 1080
       hw.lcd.height: 2400
       hw.lcd.density: 420
@@ -17,12 +17,24 @@ avds:
       disk.dataPartition.size: "4G"
       hw.keyboard: "yes"
 
-  # --- low_end_phone: HD+ (720×1600, 320dpi) — для проверки регрессий ---
-  - name: low_end_phone
+  - name: medium_phone_2
     device: pixel_6
     system_image: "system-images;android-34;google_apis;x86_64"
     sdcard: "512M"
-    hw:
+    hw: *hw_medium
+
+  - name: medium_phone_3
+    device: pixel_6
+    system_image: "system-images;android-34;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_medium
+
+  # --- low_end_phone ×3: HD+ (720×1600, 320dpi) — для проверки регрессий ---
+  - name: low_end_phone_1
+    device: pixel_6
+    system_image: "system-images;android-34;google_apis;x86_64"
+    sdcard: "512M"
+    hw: &hw_low
       hw.lcd.width: 720
       hw.lcd.height: 1600
       hw.lcd.density: 320
@@ -31,13 +43,25 @@ avds:
       disk.dataPartition.size: "2G"
       hw.keyboard: "yes"
 
+  - name: low_end_phone_2
+    device: pixel_6
+    system_image: "system-images;android-34;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_low
+
+  - name: low_end_phone_3
+    device: pixel_6
+    system_image: "system-images;android-34;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_low
+
 # =============================================================================
-# Эмуляторы (по 3 экземпляра каждого типа AVD, чётные порты начиная с 5554)
+# Эмуляторы (6 шт., чётные порты начиная с 5554)
 # =============================================================================
 
 emulators:
   - name: emu1
-    avd: medium_phone
+    avd: medium_phone_1
     port: 5554
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
     writable_system: false
@@ -46,7 +70,7 @@ emulators:
     locale: "ru-RU"
 
   - name: emu2
-    avd: medium_phone
+    avd: medium_phone_2
     port: 5556
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
     writable_system: false
@@ -55,7 +79,7 @@ emulators:
     locale: "ru-RU"
 
   - name: emu3
-    avd: medium_phone
+    avd: medium_phone_3
     port: 5558
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
     writable_system: false
@@ -64,7 +88,7 @@ emulators:
     locale: "ru-RU"
 
   - name: emu4
-    avd: low_end_phone
+    avd: low_end_phone_1
     port: 5560
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
     writable_system: false
@@ -73,7 +97,7 @@ emulators:
     locale: "ru-RU"
 
   - name: emu5
-    avd: low_end_phone
+    avd: low_end_phone_2
     port: 5562
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
     writable_system: false
@@ -82,7 +106,7 @@ emulators:
     locale: "ru-RU"
 
   - name: emu6
-    avd: low_end_phone
+    avd: low_end_phone_3
     port: 5564
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
     writable_system: false
