@@ -497,7 +497,11 @@ class EmulatorManager:
                 else:
                     self.restart(spec)
             self.dump_state()
-            time.sleep(self.poll_interval)
+            # спим с прерыванием по сигналу (проверка каждую секунду)
+            for _ in range(self.poll_interval):
+                if self._stop:
+                    break
+                time.sleep(1)
         self.log.info("Watchdog остановлен")
 
     def status(self) -> None:
