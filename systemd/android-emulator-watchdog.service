@@ -7,9 +7,9 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=/opt/android-emulator-farm
-Environment="ANDROID_HOME=/opt/android-sdk"
-Environment="ANDROID_SDK_ROOT=/opt/android-sdk"
-Environment="PATH=/opt/android-sdk/emulator:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin:/usr/bin:/bin"
+Environment="ANDROID_HOME=/root/Android/Sdk"
+Environment="ANDROID_SDK_ROOT=/root/Android/Sdk"
+Environment="PATH=/root/Android/Sdk/emulator:/root/Android/Sdk/platform-tools:/root/Android/Sdk/cmdline-tools/latest/bin:/usr/bin:/bin"
 ExecStart=python3 /opt/android-emulator-farm/scripts/emulator_manager.py watch
 ExecStartPre=python3 /opt/android-emulator-farm/scripts/emulator_manager.py start
 ExecStop=python3 /opt/android-emulator-farm/scripts/emulator_manager.py stop
