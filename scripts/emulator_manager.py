@@ -292,7 +292,7 @@ class EmulatorManager:
         self.log.info(f"{avd_spec.name}: создаю AVD "
                        f"(device={avd_spec.device}, image={avd_spec.system_image})")
         cmd = (f"yes '' | avdmanager create avd -n {avd_spec.name} "
-               f"-k {avd_spec.system_image} -d {avd_spec.device} --force")
+               f'-k "{avd_spec.system_image}" -d {avd_spec.device} --force')
         if avd_spec.sdcard:
             cmd += f" -c {avd_spec.sdcard}"
 
