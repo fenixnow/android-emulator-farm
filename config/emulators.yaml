@@ -1,21 +1,105 @@
+# =============================================================================
+# Android Emulator Farm — конфигурация AVD и эмуляторов
+# =============================================================================
+
+avds:
+  # --- medium_phone: FHD+ (1080×2400, 420dpi) — основной тип (~80% пользователей) ---
+  - name: medium_phone
+    device: pixel_6
+    system_image: "system-images;android-34;google_apis;x86_64"
+    sdcard: "512M"
+    hw:
+      hw.lcd.width: 1080
+      hw.lcd.height: 2400
+      hw.lcd.density: 420
+      hw.ramSize: 2048
+      vm.heapSize: 192
+      disk.dataPartition.size: "4G"
+      hw.keyboard: "yes"
+
+  # --- low_end_phone: HD+ (720×1600, 320dpi) — для проверки регрессий ---
+  - name: low_end_phone
+    device: pixel_6
+    system_image: "system-images;android-34;google_apis;x86_64"
+    sdcard: "512M"
+    hw:
+      hw.lcd.width: 720
+      hw.lcd.height: 1600
+      hw.lcd.density: 320
+      hw.ramSize: 1536
+      vm.heapSize: 128
+      disk.dataPartition.size: "2G"
+      hw.keyboard: "yes"
+
+# =============================================================================
+# Эмуляторы (по 3 экземпляра каждого типа AVD, чётные порты начиная с 5554)
+# =============================================================================
+
 emulators:
   - name: emu1
-    avd: Pixel_5_API_33
+    avd: medium_phone
     port: 5554
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+
   - name: emu2
-    avd: Pixel_5_API_33_clone1
+    avd: medium_phone
     port: 5556
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+
   - name: emu3
-    avd: Pixel_5_API_33_clone2
+    avd: medium_phone
     port: 5558
     extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+
+  - name: emu4
+    avd: low_end_phone
+    port: 5560
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+
+  - name: emu5
+    avd: low_end_phone
+    port: 5562
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+
+  - name: emu6
+    avd: low_end_phone
+    port: 5564
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+
+# =============================================================================
+# Watchdog
+# =============================================================================
 
 watchdog:
-  poll_interval_sec: 30       # как часто проверять доступность
-  boot_timeout_sec: 180       # сколько ждать загрузки после старта/рестарта
-  adb_timeout_sec: 5          # таймаут на одну adb-команду
-  max_restart_attempts: 3     # сколько раз подряд пытаться перезапустить, прежде чем алертить
+  poll_interval_sec: 30
+  boot_timeout_sec: 180
+  adb_timeout_sec: 5
+  max_restart_attempts: 3
+  auto_create: true
+  apk_dir: "apks"
   log_file: logs/watchdog.log
   state_file: logs/state.json
