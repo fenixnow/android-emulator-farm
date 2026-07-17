@@ -2,16 +2,16 @@
 Description=Appium Server for Android Test Automation Farm
 [Service]
 Type=simple
-User=appium
-Group=appium
+User=root
+Group=root
 WorkingDirectory=/opt/appium
 
-Environment=ANDROID_HOME=/opt/android-sdk
-Environment=ANDROID_SDK_ROOT=/opt/android-sdk
+Environment=ANDROID_HOME=/root/Android/Sdk
+Environment=ANDROID_SDK_ROOT=/root/Android/Sdk
 Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-Environment=PATH=/usr/local/bin:/usr/bin:/bin:/opt/android-sdk/emulator:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin
+Environment=PATH=/root/.nvm/versions/node/v24.18.0/bin:/usr/local/bin:/usr/bin:/bin:/root/Android/Sdk/emulator:/root/Android/Sdk/platform-tools:/root/Android/Sdk/cmdline-tools/latest/bin
 
-ExecStart=/usr/local/bin/appium server --config /opt/android-emulator-farm/config/appium-config.json
+ExecStart=/root/.nvm/versions/node/v24.18.0/bin/appium server --config /opt/android-emulator-farm/config/appium-config.json
 
 Restart=on-failure
 RestartSec=5
