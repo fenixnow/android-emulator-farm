@@ -137,6 +137,7 @@ watchdog:
   boot_timeout_sec: 180
   adb_timeout_sec: 5
   max_restart_attempts: 3
+  restart_cron: "0 5 * * *"
   auto_create: true
   apk_dir: "apks"
   log_file: logs/watchdog.log

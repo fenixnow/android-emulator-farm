@@ -9,6 +9,7 @@ Android Emulator Farm Manager
     python3 emulator_manager.py create          # создать все AVD из конфига
     python3 emulator_manager.py start           # запустить все эмуляторы из конфига (с автосозданием AVD)
     python3 emulator_manager.py stop            # остановить все эмуляторы
+    python3 emulator_manager.py restart         # перезапустить все эмуляторы (stop → pkill → start)
     python3 emulator_manager.py watch           # запустить watchdog (бесконечный цикл)
     python3 emulator_manager.py status          # разовая проверка статуса
 
@@ -37,6 +38,11 @@ try:
     import yaml
 except ImportError:
     sys.exit("Нужен пакет pyyaml: pip install pyyaml")
+
+try:
+    from croniter import croniter
+except ImportError:
+    sys.exit("Нужен пакет croniter: pip install croniter")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 CONFIG_PATH = BASE_DIR / "config" / "emulators.yaml"
@@ -120,6 +126,7 @@ class EmulatorManager:
         self.boot_timeout = int(self.wcfg.get("boot_timeout_sec", 180))
         self.adb_timeout = int(self.wcfg.get("adb_timeout_sec", 5))
         self.max_restart_attempts = int(self.wcfg.get("max_restart_attempts", 3))
+        self.restart_cron = self.wcfg.get("restart_cron", "")
         self.auto_create = bool(self.wcfg.get("auto_create", True))
         self.apk_dir = BASE_DIR / self.wcfg.get("apk_dir", "apks")
         self._stop = False
@@ -413,23 +420,24 @@ class EmulatorManager:
     def stop_one(self, spec: EmulatorSpec) -> None:
         self.log.info(f"Останавливаю {spec.name} ({spec.serial})")
         try:
-            self._run(f"adb -s {spec.serial} emu kill", timeout=self.adb_timeout)
-        except subprocess.TimeoutExpired:
+            self._run(f"adb -s {spec.serial} emu kill", timeout=3)
+        except Exception:
             pass
         if spec.pid:
             try:
                 os.killpg(os.getpgid(spec.pid), signal.SIGTERM)
-            except ProcessLookupError:
+            except Exception:
                 pass
+        spec.pid = None
 
     def start_all(self) -> None:
         for spec in self.specs:
             if self.auto_create:
                 avd_spec = self.get_avd_spec(spec.avd)
-                if avd_spec and not self.is_avd_exists(spec.avd):
-                    self.log.info(f"{spec.name}: AVD {spec.avd} не найден, создаю...")
+                if avd_spec:
+                    self.log.info(f"{spec.name}: проверяю AVD {spec.avd}...")
                     if not self.create_avd(avd_spec):
-                        self.log.error(f"{spec.name}: не удалось создать AVD {spec.avd}, пропускаю запуск")
+                        self.log.error(f"{spec.name}: не удалось создать/настроить AVD {spec.avd}, пропускаю запуск")
                         continue
             self.start_one(spec)
             time.sleep(2)
@@ -437,6 +445,26 @@ class EmulatorManager:
     def stop_all(self) -> None:
         for spec in self.specs:
             self.stop_one(spec)
+
+    def restart_all(self) -> None:
+        """Останавливает и заново запускает все эмуляторы (сброс памяти)."""
+        self.log.info("Плановый перезапуск всех эмуляторов...")
+        self.stop_all()
+        time.sleep(3)
+        # жёсткая зачистка: убить все оставшиеся процессы qemu (зависшие)
+        try:
+            subprocess.run(
+                ["pkill", "-9", "-f", "qemu-system-x86_64"],
+                timeout=10, capture_output=True,
+            )
+            self.log.info("Оставшиеся процессы qemu принудительно завершены")
+        except Exception:
+            pass
+        time.sleep(2)
+        for spec in self.specs:
+            spec.restart_count = 0
+        self.start_all()
+        self.log.info("Плановый перезапуск завершён")
 
     # ---------- watchdog ----------
 
@@ -491,6 +519,17 @@ class EmulatorManager:
             f"Watchdog запущен: poll={self.poll_interval}s, "
             f"boot_timeout={self.boot_timeout}s, max_restarts={self.max_restart_attempts}"
         )
+        # cron-расписание перезапуска
+        next_restart = None
+        if self.restart_cron:
+            try:
+                cron = croniter(self.restart_cron, datetime.now())
+                next_restart = cron.get_next(datetime)
+                self.log.info(f"Плановый перезапуск по cron: {self.restart_cron} "
+                              f"(следующий: {next_restart.strftime('%Y-%m-%d %H:%M:%S')})")
+            except (ValueError, KeyError) as e:
+                self.log.error(f"Ошибка в restart_cron '{self.restart_cron}': {e}")
+
         # первый цикл: запустить все эмуляторы, которые ещё не запущены
         devices = self.adb_devices()
         for spec in self.specs:
@@ -498,7 +537,7 @@ class EmulatorManager:
                 self.log.info(f"{spec.name} не запущен, запускаю...")
                 if self.auto_create:
                     avd_spec = self.get_avd_spec(spec.avd)
-                    if avd_spec and not self.is_avd_exists(spec.avd):
+                    if avd_spec:
                         self.create_avd(avd_spec)
                 self.start_one(spec)
                 time.sleep(2)
@@ -534,7 +573,7 @@ class EmulatorManager:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Android Emulator Farm Manager")
     parser.add_argument(
-        "action", choices=["start", "stop", "watch", "status", "create"], help="Действие"
+        "action", choices=["start", "stop", "watch", "status", "create", "restart"], help="Действие"
     )
     parser.add_argument(
         "--config", default=str(CONFIG_PATH), help="Путь к YAML-конфигу"
@@ -554,6 +593,8 @@ def main() -> None:
         manager.status()
     elif args.action == "create":
         manager.create_all()
+    elif args.action == "restart":
+        manager.restart_all()
 
 
 if __name__ == "__main__":
