@@ -379,7 +379,7 @@ class EmulatorManager:
         if spec.no_snapshot_save:
             flags.append("-no-snapshot-save")
         for key, value in spec.prop.items():
-            flags.append(f"-prop {key}={value}")
+            flags.append(f'-prop {key}="{value}"')
         if spec.extra_args:
             flags.append(spec.extra_args)
 
