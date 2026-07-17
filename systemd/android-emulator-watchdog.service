@@ -11,8 +11,8 @@ Environment="ANDROID_HOME=/root/Android/Sdk"
 Environment="ANDROID_SDK_ROOT=/root/Android/Sdk"
 Environment="PATH=/root/Android/Sdk/emulator:/root/Android/Sdk/platform-tools:/root/Android/Sdk/cmdline-tools/latest/bin:/usr/bin:/bin"
 ExecStart=python3 /opt/android-emulator-farm/scripts/emulator_manager.py watch
-ExecStartPre=python3 /opt/android-emulator-farm/scripts/emulator_manager.py start
 ExecStop=python3 /opt/android-emulator-farm/scripts/emulator_manager.py stop
+TimeoutStartSec=infinity
 Restart=always
 RestartSec=10
 StandardOutput=journal

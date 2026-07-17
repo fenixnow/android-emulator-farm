@@ -490,6 +490,18 @@ class EmulatorManager:
             f"Watchdog запущен: poll={self.poll_interval}s, "
             f"boot_timeout={self.boot_timeout}s, max_restarts={self.max_restart_attempts}"
         )
+        # первый цикл: запустить все эмуляторы, которые ещё не запущены
+        devices = self.adb_devices()
+        for spec in self.specs:
+            if spec.serial not in devices or devices[spec.serial] != "device":
+                self.log.info(f"{spec.name} не запущен, запускаю...")
+                if self.auto_create:
+                    avd_spec = self.get_avd_spec(spec.avd)
+                    if avd_spec and not self.is_avd_exists(spec.avd):
+                        self.create_avd(avd_spec)
+                self.start_one(spec)
+                time.sleep(2)
+
         while not self._stop:
             for spec in self.specs:
                 healthy = self.check_health(spec)
