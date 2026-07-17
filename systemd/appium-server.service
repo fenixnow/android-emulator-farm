@@ -1,8 +1,5 @@
 [Unit]
 Description=Appium Server for Android Test Automation Farm
-After=android-emulator-watchdog.service
-Wants=android-emulator-watchdog.service
-
 [Service]
 Type=simple
 User=appium
