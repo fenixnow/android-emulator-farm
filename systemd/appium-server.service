@@ -16,8 +16,7 @@ ExecStart=/root/.nvm/versions/node/v24.18.0/bin/appium server --config /opt/andr
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=yes
-ProtectSystem=strict
-ProtectHome=read-only
+ProtectSystem=full
 PrivateTmp=yes
 
 [Install]
