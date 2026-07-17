@@ -13,6 +13,7 @@ Environment="PATH=/root/Android/Sdk/emulator:/root/Android/Sdk/platform-tools:/r
 ExecStart=python3 /opt/android-emulator-farm/scripts/emulator_manager.py watch
 ExecStop=python3 /opt/android-emulator-farm/scripts/emulator_manager.py stop
 TimeoutStartSec=infinity
+TimeoutStopSec=30
 Restart=always
 RestartSec=10
 StandardOutput=journal

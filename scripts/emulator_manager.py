@@ -279,7 +279,8 @@ class EmulatorManager:
     def create_avd(self, avd_spec: AvdSpec) -> bool:
         """Создаёт AVD, если он ещё не существует. Затем патчит config.ini."""
         if self.is_avd_exists(avd_spec.name):
-            self.log.info(f"AVD {avd_spec.name} уже существует, пропускаю создание")
+            self.log.info(f"AVD {avd_spec.name} уже существует, патчу config.ini")
+            self.patch_avd_config(avd_spec)
             return True
 
         if not avd_spec.system_image:

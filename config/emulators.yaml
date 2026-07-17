@@ -9,6 +9,7 @@ avds:
     system_image: "system-images;android-34;google_apis;x86_64"
     sdcard: "512M"
     hw: &hw_medium
+      hw.cpu.arch: x86_64
       hw.lcd.width: 1080
       hw.lcd.height: 2400
       hw.lcd.density: 420
@@ -35,6 +36,7 @@ avds:
     system_image: "system-images;android-34;google_apis;x86_64"
     sdcard: "512M"
     hw: &hw_low
+      hw.cpu.arch: x86_64
       hw.lcd.width: 720
       hw.lcd.height: 1600
       hw.lcd.density: 320
