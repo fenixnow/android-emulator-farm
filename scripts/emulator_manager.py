@@ -286,9 +286,14 @@ class EmulatorManager:
     def create_avd(self, avd_spec: AvdSpec) -> bool:
         """Создаёт AVD, если он ещё не существует. Затем патчит config.ini."""
         if self.is_avd_exists(avd_spec.name):
-            self.log.info(f"AVD {avd_spec.name} уже существует, патчу config.ini")
-            self.patch_avd_config(avd_spec)
-            return True
+            config_path = self.get_avd_config_path(avd_spec.name)
+            if config_path and config_path.exists():
+                self.log.info(f"AVD {avd_spec.name} уже существует, патчу config.ini")
+                self.patch_avd_config(avd_spec)
+                return True
+            else:
+                self.log.warning(f"AVD {avd_spec.name} сломан (нет config.ini), пересоздаю...")
+                self._run(f"avdmanager delete avd -n {avd_spec.name}", timeout=30)
 
         if not avd_spec.system_image:
             self.log.error(f"{avd_spec.name}: не указан system_image")
