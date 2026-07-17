@@ -368,9 +368,9 @@ class EmulatorManager:
             try:
                 res = self._run(
                     f"adb -s {spec.serial} install -r {apk_file}",
-                    timeout=120,
+                    timeout=180,
                 )
-                if res.returncode == 0 or "Success" in res.stdout:
+                if res.returncode == 0 or "Success" in res.stdout or "Success" in res.stderr:
                     self.log.info(f"{spec.name}: {apk_file.name} установлен успешно")
                 else:
                     self.log.error(f"{spec.name}: ошибка установки {apk_file.name}: {res.stdout} {res.stderr}")
