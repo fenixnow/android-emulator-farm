@@ -5,6 +5,7 @@
     "base-path": "/wd/hub",
     "allow-cors": true,
     "session-override": true,
+    "local-timezone": true,
     "log-level": "info",
     "log": "/var/log/appium/appium-farm.log",
     "use-plugins": ["device-farm"],
