@@ -6,7 +6,7 @@ avds:
   # --- medium_phone ×3: FHD+ (1080×2400, 420dpi) — основной тип (~80% пользователей) ---
   - name: medium_phone_1
     device: pixel_6
-    system_image: "system-images;android-34;google_apis;x86_64"
+    system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
     hw: &hw_medium
       hw.cpu.arch: x86_64
@@ -20,20 +20,20 @@ avds:
 
   - name: medium_phone_2
     device: pixel_6
-    system_image: "system-images;android-34;google_apis;x86_64"
+    system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
     hw: *hw_medium
 
   - name: medium_phone_3
     device: pixel_6
-    system_image: "system-images;android-34;google_apis;x86_64"
+    system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
     hw: *hw_medium
 
   # --- low_end_phone ×3: HD+ (720×1600, 320dpi) — для проверки регрессий ---
   - name: low_end_phone_1
     device: pixel_6
-    system_image: "system-images;android-34;google_apis;x86_64"
+    system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
     hw: &hw_low
       hw.cpu.arch: x86_64
@@ -47,13 +47,13 @@ avds:
 
   - name: low_end_phone_2
     device: pixel_6
-    system_image: "system-images;android-34;google_apis;x86_64"
+    system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
     hw: *hw_low
 
   - name: low_end_phone_3
     device: pixel_6
-    system_image: "system-images;android-34;google_apis;x86_64"
+    system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
     hw: *hw_low
 
