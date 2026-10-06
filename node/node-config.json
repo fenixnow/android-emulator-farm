@@ -1,0 +1,22 @@
+{
+  "server": {
+    "address": "0.0.0.0",
+    "port": 4723,
+    "base-path": "/wd/hub",
+    "allow-cors": true,
+    "session-override": true,
+    "local-timezone": true,
+    "log-level": "info",
+    "log": "/Users/user/Library/Logs/appium/appium-node.log",
+    "use-plugins": ["device-farm"],
+    "plugin": {
+      "device-farm": {
+        "platform": "ios",
+        "skipChromeDownload": true,
+        "hub": "http://135.106.142.247:4723",
+        "accessKey": "<ACCESS_KEY_юзера_mac-node_на_хабе>",
+        "token": "<API_TOKEN_юзера_mac-node_на_хабе>"
+      }
+    }
+  }
+}

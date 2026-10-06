@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.farm.simulators-keepalive</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/user/device-farm-node/boot-farm-simulators.sh</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StartInterval</key>
+	<integer>60</integer>
+	<key>StandardOutPath</key>
+	<string>/Users/user/Library/Logs/appium/simulators-keepalive.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/user/Library/Logs/appium/simulators-keepalive.log</string>
+</dict>
+</plist>

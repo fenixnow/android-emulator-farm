@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.appium.device-farm-node</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/opt/homebrew/bin/appium</string>
+		<string>server</string>
+		<string>-ka</string>
+		<string>800</string>
+		<string>--use-plugins</string>
+		<string>device-farm</string>
+		<string>--config</string>
+		<string>/Users/user/device-farm-node/node-config.json</string>
+		<string>-pa</string>
+		<string>/wd/hub</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/opt/homebrew/opt/node@24/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>WorkingDirectory</key>
+	<string>/Users/user</string>
+	<key>StandardOutPath</key>
+	<string>/Users/user/Library/Logs/appium/node-launchd.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/user/Library/Logs/appium/node-launchd.log</string>
+</dict>
+</plist>
