@@ -12,7 +12,8 @@
     "plugin": {
       "device-farm": {
         "platform": "android",
-        "enableAuthentication": true
+        "enableAuthentication": true,
+        "new-command-timeout-sec": 180
       }
     }
   }
