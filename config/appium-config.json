@@ -13,7 +13,7 @@
       "device-farm": {
         "platform": "android",
         "enableAuthentication": true,
-        "new-command-timeout-sec": 180
+        "newCommandTimeoutSec": 180
       }
     }
   }
