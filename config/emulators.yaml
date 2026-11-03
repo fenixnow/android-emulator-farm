@@ -30,6 +30,18 @@ avds:
     sdcard: "512M"
     hw: *hw_medium
 
+  - name: medium_phone_4
+    device: pixel_6
+    system_image: "system-images;android-35;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_medium
+
+  - name: medium_phone_5
+    device: pixel_6
+    system_image: "system-images;android-35;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_medium
+
   # --- low_end_phone ×3: HD+ (720×1600, 320dpi) — для проверки регрессий ---
   - name: low_end_phone_1
     device: pixel_6
@@ -52,6 +64,18 @@ avds:
     hw: *hw_low
 
   - name: low_end_phone_3
+    device: pixel_6
+    system_image: "system-images;android-35;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_low
+
+  - name: low_end_phone_4
+    device: pixel_6
+    system_image: "system-images;android-35;google_apis;x86_64"
+    sdcard: "512M"
+    hw: *hw_low
+
+  - name: low_end_phone_5
     device: pixel_6
     system_image: "system-images;android-35;google_apis;x86_64"
     sdcard: "512M"
@@ -127,6 +151,50 @@ emulators:
     locale: "ru-RU"
     prop:
       ro.product.model: "Low-End Phone 3"
+
+  - name: emu7
+    avd: medium_phone_4
+    port: 5566
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+    prop:
+      ro.product.model: "Medium Phone 4"
+
+  - name: emu8
+    avd: medium_phone_5
+    port: 5568
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+    prop:
+      ro.product.model: "Medium Phone 5"
+
+  - name: emu9
+    avd: low_end_phone_4
+    port: 5570
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+    prop:
+      ro.product.model: "Low-End Phone 4"
+
+  - name: emu10
+    avd: low_end_phone_5
+    port: 5572
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    writable_system: false
+    wipe_data: false
+    no_snapshot_save: true
+    locale: "ru-RU"
+    prop:
+      ro.product.model: "Low-End Phone 5"
 
 # =============================================================================
 # Watchdog
