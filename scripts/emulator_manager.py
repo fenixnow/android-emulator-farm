@@ -355,6 +355,21 @@ class EmulatorManager:
         self._run(f"adb -s {spec.serial} wait-for-device", timeout=60)
         self.log.info(f"{spec.name}: локаль {spec.locale} применена")
 
+    def apply_test_settings(self, spec: EmulatorSpec) -> None:
+        """Отключает анимации и Doze — меньше флака и задержек в UI-тестах."""
+        try:
+            self._run(
+                f"adb -s {spec.serial} shell "
+                "\"settings put global window_animation_scale 0; "
+                "settings put global transition_animation_scale 0; "
+                "settings put global animator_duration_scale 0; "
+                "dumpsys deviceidle disable\"",
+                timeout=self.adb_timeout * 2,
+            )
+            self.log.info(f"{spec.name}: анимации отключены, deviceidle disabled")
+        except subprocess.TimeoutExpired:
+            self.log.warning(f"{spec.name}: не удалось применить тестовые настройки (timeout)")
+
     def install_apks(self, spec: EmulatorSpec) -> None:
         """Устанавливает все APK из apk_dir на эмулятор."""
         if not self.apk_dir.exists():
@@ -409,6 +424,7 @@ class EmulatorManager:
         self.log.info(f"{spec.name} запущен, pid={proc.pid}, ожидаю появления в adb devices")
         if self._wait_for_device(spec):
             self.set_locale(spec)
+            self.apply_test_settings(spec)
             self.install_apks(spec)
 
     def _wait_for_device(self, spec: EmulatorSpec) -> bool:
