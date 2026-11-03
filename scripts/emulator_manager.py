@@ -548,6 +548,14 @@ class EmulatorManager:
                 time.sleep(2)
 
         while not self._stop:
+            if next_restart and datetime.now() >= next_restart:
+                self.restart_all()
+                try:
+                    next_restart = croniter(self.restart_cron, datetime.now()).get_next(datetime)
+                    self.log.info(f"Следующий плановый перезапуск: "
+                                  f"{next_restart.strftime('%Y-%m-%d %H:%M:%S')}")
+                except (ValueError, KeyError):
+                    next_restart = None
             for spec in self.specs:
                 healthy = self.check_health(spec)
                 if healthy:
