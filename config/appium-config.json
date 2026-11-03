@@ -4,7 +4,7 @@
     "port": 4723,
     "base-path": "/wd/hub",
     "allow-cors": true,
-    "session-override": true,
+    "session-override": false,
     "local-timezone": true,
     "log-level": "info",
     "log": "/var/log/appium/appium-farm.log",
