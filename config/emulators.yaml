@@ -210,3 +210,12 @@ watchdog:
   apk_dir: "apks"
   log_file: logs/watchdog.log
   state_file: logs/state.json
+  # автозакрытие zombie-сессий device-farm (OTTE-1939)
+  zombie_cleanup:
+    enabled: true
+    interval_min: 60          # как часто проверять
+    max_age_min: 30           # running-сессии старше этого = зомби
+    api_base: "http://localhost:4723"
+    api_user: "pola"
+    api_password_file: "/opt/android-emulator-farm/config/.df-admin-pass"  # 600, в git не хранится
+    db_path: "/home/appium/.cache/appium-device-farm/device-farm-latest.db"

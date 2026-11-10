@@ -26,11 +26,14 @@ import logging
 import os
 import shlex
 import signal
+import sqlite3
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -129,6 +132,7 @@ class EmulatorManager:
         self.restart_cron = self.wcfg.get("restart_cron", "")
         self.auto_create = bool(self.wcfg.get("auto_create", True))
         self.apk_dir = BASE_DIR / self.wcfg.get("apk_dir", "apks")
+        self.zombie_cfg = self.wcfg.get("zombie_cleanup") or {}
         self._stop = False
         signal.signal(signal.SIGINT, self._handle_sigterm)
         signal.signal(signal.SIGTERM, self._handle_sigterm)
@@ -509,6 +513,85 @@ class EmulatorManager:
         self.start_all()
         self.log.info("Плановый перезапуск завершён")
 
+    # ---------- zombie-сессии (OTTE-1939) ----------
+
+    def _df_api(self, method: str, path: str, data=None, token=None):
+        """Запрос к API плагина device-farm. Возвращает (status, json-тело|None)."""
+        base = self.zombie_cfg.get("api_base", "http://localhost:4723")
+        req = urllib.request.Request(
+            base + path, method=method,
+            data=json.dumps(data).encode() if data is not None else None,
+            headers={"Content-Type": "application/json",
+                     **({"Authorization": f"Bearer {token}"} if token else {})})
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                return resp.status, json.loads(resp.read().decode() or "null")
+        except urllib.error.HTTPError as e:
+            return e.code, None
+        except Exception as e:
+            self.log.warning(f"zombie-cleanup: ошибка запроса {method} {path}: {e}")
+            return None, None
+
+    def _df_login(self) -> Optional[str]:
+        """JWT для API плагина; пароль админа читается из файла (в git не хранится)."""
+        pw_file = self.zombie_cfg.get("api_password_file", "")
+        try:
+            password = Path(pw_file).read_text().strip() if pw_file else ""
+        except OSError:
+            password = ""
+        if not password:
+            self.log.warning(f"zombie-cleanup: файл пароля недоступен: {pw_file}")
+            return None
+        status, body = self._df_api(
+            "POST", "/device-farm/api/auth/login",
+            data={"username": self.zombie_cfg.get("api_user", ""), "password": password},
+        )
+        if status == 200 and isinstance(body, dict):
+            return body.get("token")
+        self.log.error(f"zombie-cleanup: login в плагин не удался (status={status})")
+        return None
+
+    def cleanup_zombie_sessions(self) -> None:
+        """Закрывает running-сессии старше max_age_min.
+
+        Сначала DELETE по API (плагин снимает busy в своей памяти), затем
+        проверка по БД: всё ещё running — закрывается UPDATE-ом напрямую.
+        """
+        db_path = self.zombie_cfg.get("db_path", "")
+        if not db_path or not Path(db_path).exists():
+            self.log.warning(f"zombie-cleanup: БД плагина не найдена: {db_path}")
+            return
+        max_age_min = int(self.zombie_cfg.get("max_age_min", 30))
+        cutoff_ms = int((time.time() - max_age_min * 60) * 1000)
+
+        def running_now():
+            con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+            rows = con.execute(
+                "SELECT id FROM Session WHERE status='running' AND start_time < ?",
+                (cutoff_ms,)).fetchall()
+            con.close()
+            return [r[0] for r in rows]
+
+        zombies = running_now()
+        if not zombies:
+            return
+        jwt = self._df_login()
+        if jwt:
+            for sid in zombies:
+                self._df_api("DELETE", f"/wd/hub/session/{sid}", token=jwt)
+            time.sleep(1)
+        remaining = running_now()
+        if remaining:
+            con = sqlite3.connect(db_path)
+            con.executemany(
+                "UPDATE Session SET status='failed', end_time=?, "
+                "failure_reason='zombie cleanup (auto)' WHERE id=? AND status='running'",
+                [(int(time.time() * 1000), sid) for sid in remaining])
+            con.commit()
+            con.close()
+        self.log.info(f"zombie-cleanup: закрыто {len(zombies)} зомби "
+                      f"(старше {max_age_min} мин), из них {len(remaining)} через БД")
+
     # ---------- watchdog ----------
 
     def check_health(self, spec: EmulatorSpec) -> bool:
@@ -573,6 +656,10 @@ class EmulatorManager:
             except (ValueError, KeyError) as e:
                 self.log.error(f"Ошибка в restart_cron '{self.restart_cron}': {e}")
 
+        # автозакрытие zombie-сессий; первый проход сразу — чистит старьё после рестартов
+        zombie_interval = int(self.zombie_cfg.get("interval_min", 60))
+        next_zombie_cleanup = datetime.now()
+
         # первый цикл: запустить все эмуляторы, которые ещё не запущены
         devices = self.adb_devices()
         for spec in self.specs:
@@ -594,6 +681,12 @@ class EmulatorManager:
                                   f"{next_restart.strftime('%Y-%m-%d %H:%M:%S')}")
                 except (ValueError, KeyError):
                     next_restart = None
+            if self.zombie_cfg.get("enabled") and datetime.now() >= next_zombie_cleanup:
+                try:
+                    self.cleanup_zombie_sessions()
+                except Exception as e:
+                    self.log.error(f"zombie-cleanup упал: {e!r}")
+                next_zombie_cleanup = datetime.now() + timedelta(minutes=zombie_interval)
             for spec in self.specs:
                 healthy = self.check_health(spec)
                 if healthy:
