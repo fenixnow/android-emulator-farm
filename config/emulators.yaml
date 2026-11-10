@@ -89,7 +89,7 @@ emulators:
   - name: emu1
     avd: medium_phone_1
     port: 5554
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -100,7 +100,7 @@ emulators:
   - name: emu2
     avd: medium_phone_2
     port: 5556
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -111,7 +111,7 @@ emulators:
   - name: emu3
     avd: medium_phone_3
     port: 5558
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -122,7 +122,7 @@ emulators:
   - name: emu4
     avd: low_end_phone_1
     port: 5560
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -133,7 +133,7 @@ emulators:
   - name: emu5
     avd: low_end_phone_2
     port: 5562
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -144,7 +144,7 @@ emulators:
   - name: emu6
     avd: low_end_phone_3
     port: 5564
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -155,7 +155,7 @@ emulators:
   - name: emu7
     avd: medium_phone_4
     port: 5566
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -166,7 +166,7 @@ emulators:
   - name: emu8
     avd: medium_phone_5
     port: 5568
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -177,7 +177,7 @@ emulators:
   - name: emu9
     avd: low_end_phone_4
     port: 5570
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
@@ -188,7 +188,7 @@ emulators:
   - name: emu10
     avd: low_end_phone_5
     port: 5572
-    extra_args: "-no-window -no-audio -no-boot-anim -gpu swiftshader_indirect"
+    extra_args: "-no-window -no-audio -no-boot-anim -gpu host"
     writable_system: false
     wipe_data: false
     no_snapshot_save: true
