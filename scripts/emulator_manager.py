@@ -340,19 +340,34 @@ class EmulatorManager:
             return
         self.log.info(f"{spec.name}: устанавливаю локаль {spec.locale}")
 
-        root_res = self._run(f"adb -s {spec.serial} root", timeout=self.adb_timeout)
-        if "restarting adbd as root" in root_res.stdout or "restarting adbd as root" in root_res.stderr:
-            self.log.info(f"{spec.name}: adbd перезапускается в root-режиме, ожидание...")
-            time.sleep(5)
-            self._run(f"adb -s {spec.serial} wait-for-device", timeout=30)
+        try:
+            root_res = self._run(f"adb -s {spec.serial} root", timeout=self.adb_timeout)
+            if "restarting adbd as root" in root_res.stdout or "restarting adbd as root" in root_res.stderr:
+                self.log.info(f"{spec.name}: adbd перезапускается в root-режиме, ожидание...")
+                time.sleep(5)
+                self._run(f"adb -s {spec.serial} wait-for-device", timeout=30)
 
-        self.log.info(f"{spec.name}: применяю persist.sys.locale={spec.locale}, перезапускаю framework")
-        self._run(
-            f"adb -s {spec.serial} shell 'setprop persist.sys.locale {spec.locale}; stop; sleep 5; start'",
-            timeout=30,
-        )
-        time.sleep(8)
-        self._run(f"adb -s {spec.serial} wait-for-device", timeout=60)
+            self.log.info(f"{spec.name}: применяю persist.sys.locale={spec.locale}, перезапускаю framework")
+            self._run(
+                f"adb -s {spec.serial} shell 'setprop persist.sys.locale {spec.locale}; stop; sleep 5; start'",
+                timeout=30,
+            )
+            time.sleep(8)
+            self._run(f"adb -s {spec.serial} wait-for-device", timeout=60)
+        except subprocess.TimeoutExpired:
+            # zygote показывает, жив ли framework: 'stop; start' мог зависнуть после stop
+            try:
+                res = self._run(f"adb -s {spec.serial} shell getprop init.svc.zygote",
+                                timeout=self.adb_timeout)
+                zygote = res.stdout.strip()
+            except subprocess.TimeoutExpired:
+                zygote = ""
+            if zygote == "running":
+                self.log.warning(f"{spec.name}: не удалось установить локаль (timeout), продолжаю без неё")
+            else:
+                self.log.error(f"{spec.name}: framework не работает после сбоя локали "
+                               f"(zygote={zygote or 'нет ответа'}), эмулятор деградировал до рестарта")
+            return
         self.log.info(f"{spec.name}: локаль {spec.locale} применена")
 
     def apply_test_settings(self, spec: EmulatorSpec) -> None:
@@ -451,6 +466,13 @@ class EmulatorManager:
                 pass
         spec.pid = None
 
+    def _start_safely(self, spec: EmulatorSpec) -> None:
+        """Запускает эмулятор; ошибка одного не роняет батч и watchdog-процесс."""
+        try:
+            self.start_one(spec)
+        except Exception as e:
+            self.log.error(f"{spec.name}: ошибка запуска: {e!r}, продолжаю со следующим")
+
     def start_all(self) -> None:
         for spec in self.specs:
             if self.auto_create:
@@ -460,7 +482,7 @@ class EmulatorManager:
                     if not self.create_avd(avd_spec):
                         self.log.error(f"{spec.name}: не удалось создать/настроить AVD {spec.avd}, пропускаю запуск")
                         continue
-            self.start_one(spec)
+            self._start_safely(spec)
             time.sleep(2)
 
     def stop_all(self) -> None:
@@ -516,7 +538,7 @@ class EmulatorManager:
         )
         self.stop_one(spec)
         time.sleep(3)
-        self.start_one(spec)
+        self._start_safely(spec)
 
     def dump_state(self) -> None:
         state = {
@@ -560,7 +582,7 @@ class EmulatorManager:
                     avd_spec = self.get_avd_spec(spec.avd)
                     if avd_spec:
                         self.create_avd(avd_spec)
-                self.start_one(spec)
+                self._start_safely(spec)
                 time.sleep(2)
 
         while not self._stop:
