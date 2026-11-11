@@ -5,7 +5,7 @@
     "base-path": "/wd/hub",
     "allow-cors": true,
     "session-override": false,
-    "allow-insecure": ["shell"],
+    "allow-insecure": ["uiautomator2:adb_shell"],
     "local-timezone": true,
     "log-level": "info",
     "log": "/var/log/appium/appium-farm.log",
