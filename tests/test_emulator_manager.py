@@ -21,6 +21,21 @@ def _manager():
     return m
 
 
+def test_webview_a11y_flag_writes_both_files():
+    """Команда пишет флаг в оба cmdline-файла на data-разделе; timeout не роняет."""
+    m = _manager()
+    spec = SimpleNamespace(locale="ru-RU", name="emu1", serial="emulator-5554")
+    with patch.object(m, "_run", return_value=SimpleNamespace(returncode=0, stdout="", stderr="")) as run:
+        m.apply_webview_a11y_flag(spec)
+    cmd = run.call_args.args[0]
+    assert "emulator-5554" in cmd
+    assert "webview-chromium-command-line" in cmd and "webview-command-line" in cmd
+    assert "force-renderer-accessibility" in cmd
+
+    with patch.object(m, "_run", side_effect=subprocess.TimeoutExpired("adb", 10)):
+        m.apply_webview_a11y_flag(spec)
+
+
 def test_set_locale_survives_timeout():
     """adb root завис, getprop zygote тоже -> set_locale логирует error и молчит."""
     m = _manager()

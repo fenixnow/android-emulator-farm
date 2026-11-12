@@ -389,6 +389,21 @@ class EmulatorManager:
         except subprocess.TimeoutExpired:
             self.log.warning(f"{spec.name}: не удалось применить тестовые настройки (timeout)")
 
+    def apply_webview_a11y_flag(self, spec: EmulatorSpec) -> None:
+        """Пишет --force-renderer-accessibility в cmdline WebView: Chromium всегда публикует a11y-дерево (файл пропадает при -wipe-data, поэтому — при каждом старте)."""
+        try:
+            self._run(
+                f"adb -s {spec.serial} shell "
+                "\"mkdir -p /data/local/tmp && "
+                "echo '_ --force-renderer-accessibility' > /data/local/tmp/webview-chromium-command-line && "
+                "chmod 644 /data/local/tmp/webview-chromium-command-line && "
+                "cp /data/local/tmp/webview-chromium-command-line /data/local/tmp/webview-command-line\"",
+                timeout=self.adb_timeout * 2,
+            )
+            self.log.info(f"{spec.name}: webview-chromium-command-line записан (--force-renderer-accessibility)")
+        except subprocess.TimeoutExpired:
+            self.log.warning(f"{spec.name}: не удалось записать webview-chromium-command-line (timeout)")
+
     def install_apks(self, spec: EmulatorSpec) -> None:
         """Устанавливает все APK из apk_dir на эмулятор."""
         if not self.apk_dir.exists():
@@ -444,6 +459,7 @@ class EmulatorManager:
         if self._wait_for_device(spec):
             self.set_locale(spec)
             self.apply_test_settings(spec)
+            self.apply_webview_a11y_flag(spec)
             self.install_apks(spec)
 
     def _wait_for_device(self, spec: EmulatorSpec) -> bool:
